@@ -1,0 +1,112 @@
+import pygame
+import random
+
+# 初始化 pygame
+pygame.init()
+
+# 屏幕尺寸
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
+
+# 创建屏幕
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pygame.display.set_caption("无限命无限长贪吃蛇")
+
+# 颜色定义
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+GREEN = (0, 255, 0)
+
+# 蛇的初始位置和大小
+snake_block = 10
+snake_speed = 6
+snake_x = SCREEN_WIDTH / 2
+snake_y = SCREEN_HEIGHT / 2
+snake_x_change = 0
+snake_y_change = 0
+snake_list = []
+snake_length = 1
+
+# 食物的初始位置
+food_x = round(random.randrange(0, SCREEN_WIDTH - snake_block) / 10.0) * 10.0
+food_y = round(random.randrange(0, SCREEN_HEIGHT - snake_block) / 10.0) * 10.0
+
+# 游戏时钟
+clock = pygame.time.Clock()
+
+# 游戏得分
+score = 0
+
+# 游戏状态
+game_over = False
+lives = float('inf')  # 无限条命
+
+def draw_snake(snake_list):
+    for x, y in snake_list:
+        pygame.draw.rect(screen, GREEN, [x, y, snake_block, snake_block])
+
+def show_score(score):
+    font = pygame.font.SysFont(None, 30)
+    score_text = font.render("Score: " + str(score), True, WHITE)
+    screen.blit(score_text, [10, 10])
+
+def show_lives(lives):
+    font = pygame.font.SysFont(None, 30)
+    lives_text = font.render("Lives: Infinite", True, WHITE)
+    screen.blit(lives_text, [10, 40])
+
+while not game_over:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            game_over = True
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LEFT:
+                snake_x_change = -snake_block
+                snake_y_change = 0
+            elif event.key == pygame.K_RIGHT:
+                snake_x_change = snake_block
+                snake_y_change = 0
+            elif event.key == pygame.K_UP:
+                snake_y_change = -snake_block
+                snake_x_change = 0
+            elif event.key == pygame.K_DOWN:
+                snake_y_change = snake_block
+                snake_x_change = 0
+
+    snake_x += snake_x_change
+    snake_y += snake_y_change
+
+    # 蛇超出屏幕边界时从另一侧出现
+    if snake_x >= SCREEN_WIDTH:
+        snake_x = 0
+    elif snake_x < 0:
+        snake_x = SCREEN_WIDTH - snake_block
+    if snake_y >= SCREEN_HEIGHT:
+        snake_y = 0
+    elif snake_y < 0:
+        snake_y = SCREEN_HEIGHT - snake_block
+
+    snake_head = [snake_x, snake_y]
+    snake_list.append(snake_head)
+
+    if len(snake_list) > snake_length:
+        del snake_list[0]
+
+    # 检测蛇是否吃到食物
+    if snake_x == food_x and snake_y == food_y:
+        food_x = round(random.randrange(0, SCREEN_WIDTH - snake_block) / 10.0) * 10.0
+        food_y = round(random.randrange(0, SCREEN_HEIGHT - snake_block) / 10.0) * 10.0
+        snake_length += 1
+        score += 10
+
+    screen.fill(BLACK)
+    pygame.draw.rect(screen, WHITE, [food_x, food_y, snake_block, snake_block])
+    draw_snake(snake_list)
+    show_score(score)
+    show_lives(lives)
+    pygame.display.update()
+
+    clock.tick(snake_speed)
+
+pygame.quit()
+quit()
